@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Game Sales Prediction</title>
+  <style>
+    body { font-family: Inter, Arial, sans-serif; background: #f4f7fc; color: #111827; margin: 0; padding: 0; }
+    .container { max-width: 980px; margin: 0 auto; padding: 24px; }
+    header { margin-bottom: 24px; }
+    h1 { margin: 0 0 8px; color: #0f4c81; }
+    .card { background: white; border-radius: 18px; box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08); padding: 24px; margin-bottom: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    label { display: block; margin-bottom: 8px; font-weight: 600; }
+    input[type="text"], select { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 12px; font-size: 0.95rem; }
+    small { display: block; margin-top: 6px; color: #475569; }
+    button { background: #0f4c81; color: white; border: none; border-radius: 12px; padding: 14px 20px; font-size: 1rem; cursor: pointer; }
+    button:hover { background: #0b3b66; }
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+    th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid #e5e7eb; }
+    th { background: #f8fafc; }
+    .result { font-size: 1.1rem; font-weight: 700; margin-top: 16px; }
+    .error { color: #b91c1c; margin-top: 12px; }
+    .note { background: #eef2ff; color: #1e3a8a; padding: 14px 16px; border-radius: 14px; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Prediksi Other Sales Video Game</h1>
+      <p>Model regresi linear ini menggunakan dataset Global Video Game Sales dari file eksternal <code>vgsales.csv</code>. Input meliputi Tahun rilis, Genre, dan penjualan NA/EU/JP; nilai Other Sales diprediksi, lalu total Global Sales dihitung otomatis.</p>
+      <div class="note">Model disimpan di file: <strong>{{ model_path }}</strong></div>
+    </header>
+
+    <section class="card">
+      <h2>Masukkan Fitur</h2>
+      <p>Isi penjualan Amerika Utara, Eropa, dan Jepang untuk memprediksi nilai Other Sales.
+        Total Global Sales akan dihitung otomatis.</p>
+      <form method="post">
+        <div class="grid">
+          {% for feature in feature_names %}
+          <div>
+            <label for="{{ feature }}">{{ feature_metadata[feature].label }}</label>
+            <input id="{{ feature }}" name="{{ feature }}" type="text"
+              value="{{ sample[feature] if sample and sample[feature] is not none else '' }}"
+              placeholder="Contoh: {{ feature_metadata[feature].example }}" />
+            <small>{{ feature_metadata[feature].description }}</small>
+          </div>
+          {% endfor %}
+        </div>
+        <div style="margin-top: 18px;">
+          <button type="submit">Prediksi Other Sales</button>
+        </div>
+      </form>
+      {% if error_message %}
+      <div class="error">{{ error_message }}</div>
+      {% endif %}
+      {% if prediction is not none %}
+      <div class="result">
+        Prediksi Other Sales: <strong>{{ prediction.other_sales | round(4) }}</strong> juta unit<br />
+        Total Global Sales: <strong>{{ prediction.global_sales | round(4) }}</strong> juta unit
+      </div>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <h2>Evaluasi Model</h2>
+      <div class="grid">
+        <div>
+          <h3>Data Latih</h3>
+          <table>
+            <tr><th>Metode</th><th>Nilai</th></tr>
+            <tr><td>R²</td><td>{{ metrics.train.R2 | round(4) }}</td></tr>
+            <tr><td>MAE</td><td>{{ metrics.train.MAE | round(4) }}</td></tr>
+            <tr><td>MSE</td><td>{{ metrics.train.MSE | round(4) }}</td></tr>
+            <tr><td>RMSE</td><td>{{ metrics.train.RMSE | round(4) }}</td></tr>
+          </table>
+        </div>
+        <div>
+          <h3>Data Uji</h3>
+          <table>
+            <tr><th>Metode</th><th>Nilai</th></tr>
+            <tr><td>R²</td><td>{{ metrics.test.R2 | round(4) }}</td></tr>
+            <tr><td>MAE</td><td>{{ metrics.test.MAE | round(4) }}</td></tr>
+            <tr><td>MSE</td><td>{{ metrics.test.MSE | round(4) }}</td></tr>
+            <tr><td>RMSE</td><td>{{ metrics.test.RMSE | round(4) }}</td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
